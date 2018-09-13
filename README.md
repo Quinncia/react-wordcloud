@@ -8,7 +8,7 @@ original word cloud generator: https://www.jasondavies.com/wordcloud/.
 Add to `package.json` with `yarn` or `npm`.
 
 ```bash
-yarn add https://github.com/chrisrzhou/react-wordcloud.git
+yarn add q-fork-react-wordcloud
 ```
 
 ## Usage

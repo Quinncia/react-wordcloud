@@ -1,10 +1,9 @@
 {
-  "name": "react-wordcloud",
+  "name": "q-fork-react-wordcloud",
   "version": "0.1.0",
-  "description": "Powerful React + D3 word cloud component with rich features. Based on the original word cloud generator: https://www.jasondavies.com/wordcloud/.",
+  "description": "Powerful React + D3 word cloud component with rich features.",
   "main": "build/index.js",
-  "repository": "https://github.com/chrisrzhou/react-wordcloud",
-  "author": "Chris Zhou <christoper.r.zhou@gmail.com>",
+  "repository": "https://github.com/quinncia/react-wordcloud",
   "license": "MIT",
   "scripts": {
     "clean": "rimraf build/*",
