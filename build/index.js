@@ -86,7 +86,7 @@ var WordCloud = function (_React$Component) {
       tooltipX: 0,
       tooltipY: 0
     }, _this._setText = function (d) {
-      return d[_this.props.wordKey];
+      return _lodash2.default.get(d, _this.props.wordKey, '');
     }, _this._colorScale = function (d, i) {
       var _this$props = _this.props,
           colorScale = _this$props.colorScale,
@@ -100,16 +100,16 @@ var WordCloud = function (_React$Component) {
           wordCountKey = _this$props2.wordCountKey,
           onSetTooltip = _this$props2.onSetTooltip;
 
-      var tooltipContent = onSetTooltip ? onSetTooltip(d) : d[wordKey] + ' (' + d[wordCountKey] + ')';
+      var tooltipContent = onSetTooltip ? onSetTooltip(d) : _lodash2.default.get(d, wordKey, '') + (' (' + d[wordCountKey] + ')');
       if (tooltipEnabled) {
         _this.setState({
           tooltipContent: tooltipContent,
           tooltipEnabled: true,
-          tooltipX: _d3Selection.event.pageX,
-          tooltipY: _d3Selection.event.pageY - 28
+          tooltipX: _d3Selection.event.clientX,
+          tooltipY: _d3Selection.event.clientY - 28
         });
       }
-    }, _this._onMouseOut = function (d) {
+    }, _this._onMouseOut = function () {
       if (_this.props.tooltipEnabled) {
         _this.setState({
           tooltipEnabled: false
@@ -212,21 +212,23 @@ var WordCloud = function (_React$Component) {
           spiral = props.spiral,
           width = props.width,
           wordCountKey = props.wordCountKey,
-          words = props.words;
+          words = props.words,
+          minFontSize = props.minFontSize,
+          maxFontSize = props.maxFontSize;
       // update svg/vis nodes dimensions
 
       this._setDimensions(height, width);
       this._svg.attrs({
         height: this._height,
         width: this._width
-      });
+      }).style('background-color', 'white');
       this._vis.attr('transform', 'translate(' + this._width / 2 + ', ' + this._height / 2 + ')');
 
       // update fontScale by rescaling to min/max values of data
       // if min === max, we prefer the upper bound range value
       var d3Scale = _getScale(scale);
       var filteredWords = words.slice(0, maxWords);
-      this._fontScale = _lodash2.default.uniqBy(filteredWords, wordCountKey).length > 1 ? d3Scale().range([10, 100]) : d3Scale().range([100, 100]);
+      this._fontScale = _lodash2.default.uniqBy(filteredWords, wordCountKey).length > 1 ? d3Scale().range([minFontSize, maxFontSize]) : d3Scale().range([maxFontSize, maxFontSize]);
       if (filteredWords.length) {
         this._fontScale.domain([d3.min(filteredWords, function (d) {
           return d[wordCountKey];
@@ -318,7 +320,7 @@ var WordCloud = function (_React$Component) {
       (0, _invariant2.default)(minAngle <= maxAngle, 'minAngle must be <= maxAngle');
       if (words.length > 0) {
         var firstRow = words[0];
-        (0, _invariant2.default)(wordKey in firstRow, 'Word key must be a valid key in the data');
+        (0, _invariant2.default)(_lodash2.default.get(firstRow, wordKey, false), 'Word key must be a valid key in the data');
         (0, _invariant2.default)(wordCountKey in firstRow, 'Word count key must be a valid key in the data');
       }
     }
@@ -339,7 +341,9 @@ WordCloud.defaultProps = {
   spiral: 'rectangular',
   tooltipEnabled: true,
   transitionDuration: 1000,
-  width: null
+  width: null,
+  minFontSize: 10,
+  maxFontSize: 100
 };
 
 

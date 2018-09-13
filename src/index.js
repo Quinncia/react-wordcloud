@@ -109,6 +109,14 @@ type TProps = {
    * Callback when word is clicked.
    */
   onWordClick?: (d: Object) => void,
+  /**
+   * Minimum font size for the words in the cloud. Defaults to 10.
+   */
+  minFontSize: number,
+  /**
+   * Maximum font size for the words in the cloud. Defaults to 100.
+   */
+  maxFontSize: number,
 };
 
 type TState = {
@@ -142,6 +150,8 @@ class WordCloud extends React.Component<TProps, TState> {
     tooltipEnabled: true,
     transitionDuration: 1000,
     width: null,
+    minFontSize: 10,
+    maxFontSize: 100,
   };
 
   state = {
@@ -236,6 +246,8 @@ class WordCloud extends React.Component<TProps, TState> {
       width,
       wordCountKey,
       words,
+      minFontSize,
+      maxFontSize,
     } = props;
     // update svg/vis nodes dimensions
     this._setDimensions(height, width);
@@ -243,7 +255,8 @@ class WordCloud extends React.Component<TProps, TState> {
       .attrs({
         height: this._height,
         width: this._width,
-      });
+      })
+      .style('background-color', 'white');
     this._vis.attr(
       'transform',
       `translate(${this._width / 2}, ${this._height / 2})`,
@@ -255,8 +268,8 @@ class WordCloud extends React.Component<TProps, TState> {
     const filteredWords = words.slice(0, maxWords);
     this._fontScale =
       _.uniqBy(filteredWords, wordCountKey).length > 1
-        ? d3Scale().range([10, 100])
-        : d3Scale().range([100, 100]);
+        ? d3Scale().range([minFontSize, maxFontSize])
+        : d3Scale().range([maxFontSize, maxFontSize]);
     if (filteredWords.length) {
       this._fontScale.domain([
         d3.min(filteredWords, (d: Object): number => d[wordCountKey]),
@@ -348,7 +361,7 @@ class WordCloud extends React.Component<TProps, TState> {
   }
 
   _setText = (d: Object): string => {
-    return d[this.props.wordKey];
+    return _.get(d, this.props.wordKey, '');
   };
 
   _colorScale = (d: Object, i: number): string => {
@@ -362,18 +375,18 @@ class WordCloud extends React.Component<TProps, TState> {
     const {tooltipEnabled, wordKey, wordCountKey, onSetTooltip} = this.props;
     const tooltipContent = onSetTooltip
       ? onSetTooltip(d)
-      : `${d[wordKey]} (${d[wordCountKey]})`;
+      : _.get(d, wordKey, '') + ` (${d[wordCountKey]})`;
     if (tooltipEnabled) {
       this.setState({
         tooltipContent,
         tooltipEnabled: true,
-        tooltipX: currentEvent.pageX,
-        tooltipY: currentEvent.pageY - 28,
+        tooltipX: currentEvent.clientX,
+        tooltipY: currentEvent.clientY - 28,
       });
     }
   };
 
-  _onMouseOut = (d: Object): void => {
+  _onMouseOut = (): void => {
     if (this.props.tooltipEnabled) {
       this.setState({
         tooltipEnabled: false,
@@ -391,7 +404,7 @@ class WordCloud extends React.Component<TProps, TState> {
     if (words.length > 0) {
       const firstRow = words[0];
       invariant(
-        wordKey in firstRow,
+        _.get(firstRow, wordKey, false),
         'Word key must be a valid key in the data',
       );
       invariant(
